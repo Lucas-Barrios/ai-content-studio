@@ -63,7 +63,7 @@ def make_docx_bytes(content: str, topic: str) -> bytes:
     from docx.shared import Pt
 
     doc = Document()
-    doc.add_heading(topic or "SRH Content", 0)
+    doc.add_heading(topic or "Content", 0)
 
     for line in content.splitlines():
         stripped = line.strip()

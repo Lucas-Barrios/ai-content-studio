@@ -33,10 +33,10 @@ LENGTH_HINTS: dict[str, str] = {
 }
 
 KB_DIRS: dict[str, list[tuple[str, str]]] = {
-    "primary": [("PRIMARY SOURCES", "knowledge_base/primary/")],
+    "primary": [("PRIMARY SOURCES", "knowledge_base/meridian_wealth/")],
     "secondary": [("SECONDARY SOURCES", "knowledge_base/secondary/")],
     "hybrid": [
-        ("PRIMARY SOURCES", "knowledge_base/primary/"),
+        ("PRIMARY SOURCES", "knowledge_base/meridian_wealth/"),
         ("SECONDARY SOURCES", "knowledge_base/secondary/"),
     ],
 }
@@ -62,7 +62,7 @@ class UploadedFileRef:
 class GenerateContentRequest:
     contentType: ContentType
     topic: str
-    audience: str = "Prospective Students"
+    audience: str = "Target Audience"
     language: Language = "english"
     tone: str = "Professional"
     length: Length = "Medium"
@@ -121,8 +121,13 @@ def combine_knowledge_base_sections(sections: list[str]) -> str:
 
 
 def source_type_from_path(kb_dir: str) -> Literal["primary", "secondary"]:
-    """Infer source type from a knowledge-base path."""
-    return "primary" if "primary" in kb_dir else "secondary"
+    """
+    Infer source type from a knowledge-base path.
+
+    Primary sources live in a per-tenant folder (e.g. knowledge_base/meridian_wealth/),
+    so anything that is not the shared secondary folder is treated as primary.
+    """
+    return "secondary" if "secondary" in kb_dir else "primary"
 
 
 def source_file_from_document(doc: dict, source_type: Literal["primary", "secondary"]) -> SourceFile:
@@ -181,7 +186,7 @@ def _build_brand_prefix(request: GenerateContentRequest) -> str:
 
 
 def generate_content(request: GenerateContentRequest) -> GenerateContentResult:
-    """Run the existing SRH content pipeline for a typed frontend request."""
+    """Run the content pipeline for a typed frontend request."""
     logger.info("Starting content generation topic='%s' type=%s kb=%s brand_profile=%s",
                 request.topic, request.contentType, request.knowledgeBase, request.brand_profile_id)
     topic = request.topic.strip()

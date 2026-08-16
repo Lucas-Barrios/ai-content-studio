@@ -60,7 +60,7 @@ def main() -> None:
     client = TestClient(app)
     client.get("/health")
     client.post("/generate", json={"contentType": "bad", "topic": "AI"})
-    client.post("/compare", json={"content": "SRH Berlin Career Success", "topic": "Audit"})
+    client.post("/compare", json={"content": "Meridian Core Portfolio", "topic": "Audit"})
     client.post(
         "/feedback",
         json={

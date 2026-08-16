@@ -1,4 +1,4 @@
-# Python backend dependencies for the SRH AI Content Creator.
+# Python backend dependencies for the AI Content Studio.
 #
 # Install:
 #   pip install -r requirements.txt

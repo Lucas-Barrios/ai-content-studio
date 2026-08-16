@@ -43,7 +43,7 @@ def call_content_generator(prompt: str, generator: ContentGenerator | None = Non
 class Pipeline:
     """Five-stage content pipeline: ingest → identify need → brief → generate → refine."""
 
-    def __init__(self, kb_dir: str = "knowledge_base/primary/", language: str = "english"):
+    def __init__(self, kb_dir: str = "knowledge_base/meridian_wealth/", language: str = "english"):
         self.kb_dir = kb_dir
         self.language = language
         self.kb_context: str = ""
@@ -67,7 +67,7 @@ class Pipeline:
 
     # ── Stage 2 ───────────────────────────────────────────────────────────────
 
-    def monitor(self, topic: str, content_type: str = "blog_post", audience: str = "prospective students", extra: str = "") -> str:
+    def monitor(self, topic: str, content_type: str = "blog_post", audience: str = "the brand's target audience", extra: str = "") -> str:
         """
         Identify a content need and store it for the next stage.
         In production this would scan a content calendar or CMS gap analysis.

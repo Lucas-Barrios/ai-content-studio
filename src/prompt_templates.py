@@ -2,32 +2,50 @@
 prompt_templates.py
 
 Centralised library of prompt templates for each content type.
+
 Responsibilities:
-  - Provide structured system and user prompts for blog posts, social media, emails, etc.
-  - Inject retrieved context (RAG chunks) and user-supplied variables into templates
-  - Enforce SRH University tone, brand voice, and compliance guardrails
+  - Provide structured, brand-neutral prompts for blog posts, social media,
+    service/offering descriptions, and newsletters.
+  - Inject retrieved context (RAG chunks) and user-supplied variables.
+  - Defer all brand voice, positioning, and banned-term enforcement to the
+    BRAND PROFILE block supplied at runtime.
+
+Design note — brand neutrality:
+  These templates never hardcode a client brand. Brand voice reaches the model
+  two ways depending on the path:
+    - Production API path: brand_intelligence.assemble_brand_block() injects a
+      structured BRAND PROFILE section (voice, approved/banned terms, compliance
+      notes) ahead of the template.
+    - File-based CLI path: the active tenant's brand_guidelines.md is part of the
+      retrieved knowledge-base context.
+  The templates instruct the model to obey whichever brand guidance is present
+  and to ground every claim in the KNOWLEDGE BASE CONTEXT.
 """
 
 SUPPORTED_LANGUAGES = {"english", "german"}
 
-SRH_VOICE_RULES = """
-SRH Brand Voice Rules (apply to every piece of content):
-- Tone: Confident, warm, and expert — never corporate-speak or generic.
-- Perspective: Student-first; speak to aspirations, not just program features.
-- Differentiators to weave in: CORE principle (Competence-Oriented Research and Education),
-  Berlin ecosystem, small cohorts, dual-study options, applied learning, international diversity.
-- Avoid: Hollow superlatives ("world-class", "cutting-edge"), passive voice, and filler phrases.
-- Claims: Only reference specific programs, outcomes, or statistics that appear in the context below.
-- Language: British English unless the audience is explicitly North American.
+BRAND_VOICE_CONTRACT = """
+BRAND & COMPLIANCE CONTRACT (applies to every piece of content):
+- Follow the BRAND PROFILE block if one is provided above; otherwise follow the
+  brand guidelines found in the KNOWLEDGE BASE CONTEXT.
+- Never use any term listed as banned/prohibited for the brand. If a natural
+  phrasing would use a banned term, rewrite it — do not use a near-synonym that
+  breaks the same rule.
+- Ground every factual claim, statistic, name, or figure in the KNOWLEDGE BASE
+  CONTEXT below. Do not invent facts, outcomes, or numbers.
+- Honour the brand's compliance notes exactly (e.g. required disclosures, risk
+  statements, consent-first CTAs). When in doubt, state limits plainly rather
+  than overclaiming.
+- Match the brand's voice and reading level. Avoid hollow superlatives
+  ("world-class", "cutting-edge"), passive voice, and filler.
 """
 
 GERMAN_VOICE_ADDENDUM = """
-German Language Rules (apply in addition to all brand voice rules above):
+German Language Rules (apply in addition to all brand rules above):
 - Write entirely in German — headings, body, CTA, and meta description.
 - Use formal "Sie" address throughout (not "du").
-- Maintain British English spellings for any English proper nouns (e.g. programme names).
 - Adapt idioms naturally — do not translate English phrases word-for-word.
-- For German audiences, lead with practical outcomes and career relevance; de-emphasise prestige language.
+- Lead with practical outcomes and relevance; de-emphasise prestige language.
 """
 
 
@@ -51,26 +69,22 @@ def _language_block(language: str) -> str:
 
 def blog_post_template(kb_context: str, topic: str, language: str = "english") -> str:
     """
-    Generate a long-form blog post grounded in SRH knowledge base content.
+    Generate a long-form blog post grounded in the retrieved knowledge base.
 
-    Use this template when producing thought-leadership articles, program spotlights,
-    student advice pieces, or trend analysis for the SRH website or Medium channel.
-    Aim for 700–1,000 words. The model should cite specific programs or outcomes
-    drawn from kb_context rather than inventing details.
+    Brand-neutral: voice and compliance come from the BRAND PROFILE block or the
+    brand guidelines present in kb_context. Aim for 700–1,000 words; cite only
+    facts drawn from kb_context.
 
     Args:
-        kb_context: Relevant chunks retrieved from the SRH knowledge base.
+        kb_context: Relevant chunks retrieved for the active brand.
         topic: The specific angle or question the post should address.
         language: Output language — 'english' or 'german'. Defaults to 'english'.
-
-    Returns:
-        A formatted prompt string ready to send to the LLM.
     """
     language = _validate_language(language)
-    return f"""You are a senior content strategist writing for SRH University's blog.
-Your task is to produce an engaging, expert-led blog post on the topic below.
+    return f"""You are a senior content strategist writing for the client brand described in the BRAND PROFILE / knowledge base below.
+Produce an engaging, expert-led blog post on the topic below.
 
-{SRH_VOICE_RULES}
+{BRAND_VOICE_CONTRACT}
 
 --- KNOWLEDGE BASE CONTEXT ---
 {kb_context}
@@ -80,44 +94,38 @@ TOPIC: {topic}
 
 OUTPUT REQUIREMENTS:
 - Length: 700–1,000 words.
-- Structure: SRH-specific hook, 2–4 body sections with subheadings, closing CTA to an SRH program or open day.
+- Structure: brand-specific hook, 2–4 body sections with subheadings, closing CTA consistent with the brand's CTA conventions.
 - Back every claim with evidence from the context above — no invented statistics.
 - End with a one-sentence meta description (prefixed "Meta:") suitable for SEO.
 - Format in Markdown.
 
 HOOK RULE — this is the most important instruction:
-- The very first sentence must be a concrete, SRH-specific hook drawn from the context above.
-- Use one of these hook types:
-    a) A named student or alumni quote: e.g. "Hassan Hadeed was working as a software tester when he enrolled — 18 months later he was leading the team."
-    b) A specific SRH stat or fact: e.g. "Students from 140 countries study together at SRH Berlin — and most of them graduate with a job offer already in hand."
-    c) A surprising program detail: e.g. "At SRH, you never study more than one subject at a time — that single rule changes everything about how deeply you learn."
-- NEVER open with: "In today's world…", "Artificial intelligence is transforming…", "Choosing the right university…", "In an era of…", or any scene-setting sentence about industry trends.
-- If you cannot find a suitable hook in the context, open with the most specific SRH fact available rather than a generic statement.
+- The very first sentence must be a concrete, brand-specific hook drawn from the context above
+  (a named proof point, a specific figure with its source/period, or a distinctive detail).
+- NEVER open with: "In today's world…", "Artificial intelligence is transforming…",
+  "Choosing the right…", "In an era of…", or any generic scene-setting sentence.
+- If you cannot find a suitable hook in the context, open with the most specific brand fact
+  available rather than a generic statement.
 {_language_block(language)}"""
 
 
 def social_media_template(kb_context: str, announcement: str, language: str = "english") -> str:
     """
-    Create a dual-format LinkedIn and Instagram post for an SRH announcement.
+    Create a dual-format LinkedIn and Instagram post for a brand announcement.
 
-    Use this template for program launches, open days, alumni spotlights, rankings news,
-    or partnership announcements. Returns two posts in one response: one optimised for
-    LinkedIn (professional, ~150 words) and one for Instagram (punchy, emoji-light, ~60 words).
-    The model should anchor each post to a concrete SRH differentiator from kb_context.
+    Returns two posts: one for LinkedIn (~150 words) and one for Instagram
+    (~60 words), both anchored to a concrete brand proof point from kb_context.
 
     Args:
-        kb_context: Relevant chunks retrieved from the SRH knowledge base.
-        announcement: The specific news or event to promote.
+        kb_context: Relevant chunks retrieved for the active brand.
+        announcement: The specific news or message to promote.
         language: Output language — 'english' or 'german'. Defaults to 'english'.
-
-    Returns:
-        A formatted prompt string ready to send to the LLM.
     """
     language = _validate_language(language)
-    return f"""You are SRH University's social media manager.
+    return f"""You are the social media manager for the client brand described in the BRAND PROFILE / knowledge base below.
 Write two posts for the announcement below — one for LinkedIn, one for Instagram.
 
-{SRH_VOICE_RULES}
+{BRAND_VOICE_CONTRACT}
 
 --- KNOWLEDGE BASE CONTEXT ---
 {kb_context}
@@ -125,26 +133,20 @@ Write two posts for the announcement below — one for LinkedIn, one for Instagr
 
 ANNOUNCEMENT: {announcement}
 
-OUTPUT FORMAT (use these exact headings):
-
 HOOK RULE — applies to both posts:
-- The opening line must be a concrete, SRH-specific hook drawn from the context above.
-- Preferred hook types:
-    a) A named alumni result: e.g. "Hassan Hadeed enrolled as a tester. He graduated as a team lead."
-    b) A specific SRH stat: e.g. "140 countries. One campus. One shared goal."
-    c) A program detail that surprises: e.g. "One subject at a time. No distractions. That's CORE."
+- The opening line must be a concrete, brand-specific hook drawn from the context above.
 - NEVER open with: "Exciting news!", "We are thrilled to announce…", "In today's competitive landscape…", or any generic marketing phrase.
 
 ## LinkedIn Post
 - Length: 100–150 words.
-- First line: SRH-specific hook (see above).
-- Highlight one specific SRH differentiator (CORE principle, Berlin location, cohort size, etc.).
-- Close with a clear CTA (link in bio / register now / learn more).
+- First line: brand-specific hook (see above).
+- Highlight one specific brand differentiator or proof point from the context.
+- Close with a CTA consistent with the brand's CTA conventions.
 - Include 3–5 relevant hashtags at the end.
 
 ## Instagram Post
 - Length: 50–70 words.
-- First line: punchy SRH-specific hook — write as if paired with a strong image.
+- First line: punchy brand-specific hook — write as if paired with a strong image.
 - Use 1–2 emojis maximum; no emoji spam.
 - Include 5–8 hashtags on a separate line.
 {_language_block(language)}"""
@@ -152,90 +154,77 @@ HOOK RULE — applies to both posts:
 
 def program_description_template(kb_context: str, program_name: str, language: str = "english") -> str:
     """
-    Write a polished program description for the SRH website or prospectus.
+    Write a polished description of a single offering (a service, product, or
+    programme) for a website or one-pager.
 
-    Use this template for degree program pages, brochure copy, or admissions portal listings.
-    Output includes a headline, overview paragraph, key features list, career outcomes,
-    and an entry requirements summary — all grounded in kb_context so details are accurate.
-    The dual-study structure should be surfaced where the program supports it.
+    Brand-neutral and vertical-agnostic: works for a service line, a product,
+    or a programme. All specifics — sections, outcomes, requirements — must come
+    from kb_context. `program_name` is the offering name.
 
     Args:
-        kb_context: Relevant chunks retrieved from the SRH knowledge base (program specs,
-                    career outcomes, brand guidelines).
-        program_name: Full official name of the program (e.g. "Executive MBA General Management").
+        kb_context: Relevant chunks retrieved for the active brand.
+        program_name: Name of the offering to describe.
         language: Output language — 'english' or 'german'. Defaults to 'english'.
-
-    Returns:
-        A formatted prompt string ready to send to the LLM.
     """
     language = _validate_language(language)
-    return f"""You are a higher-education copywriter producing official program copy for SRH University.
-Write a complete program description for the program specified below.
+    return f"""You are a senior copywriter producing official offering copy for the client brand described in the BRAND PROFILE / knowledge base below.
+Write a complete description of the offering specified below.
 
-{SRH_VOICE_RULES}
+{BRAND_VOICE_CONTRACT}
 
 --- KNOWLEDGE BASE CONTEXT ---
 {kb_context}
 --- END CONTEXT ---
 
-PROGRAM: {program_name}
+OFFERING: {program_name}
 
 OUTPUT STRUCTURE (use these exact headings, format in Markdown):
 
 HOOK RULE — applies to the Headline and Overview:
-- The headline and the first sentence of the Overview must be grounded in a specific SRH fact, outcome, or program detail from the context above.
-- Headline examples of the right style:
-    a) Outcome-led: "Graduate job-ready — with real projects, real partners, real Berlin."
-    b) Stat-led: "One subject at a time. Eight weeks. Deeper than any lecture ever could go."
-    c) Quote-led: "'SRH gave me the ethics lens I use every day.' — MSc Data Science alumna."
-- NEVER open the headline or overview with: "Welcome to…", "Are you ready to…", "In today's data-driven world…", or any phrase that could apply to any university.
+- The headline and first sentence of the Overview must be grounded in a specific fact,
+  outcome, or detail about this offering from the context above.
+- NEVER open with: "Welcome to…", "Are you ready to…", "In today's … world…", or any
+  phrase that could apply to any brand.
 
-## [Program Name] — Headline
-A single punchy headline (max 12 words) that leads with the student outcome, not the institution.
+## [Offering Name] — Headline
+A single punchy headline (max 12 words) that leads with the reader's outcome, not the brand.
 
 ## Overview
-2–3 sentences: what the program is, who it is for, and what makes the SRH approach distinctive
-(CORE principle, applied learning, Berlin ecosystem). No invented facts.
+2–3 sentences: what the offering is, who it is for, and what makes the brand's approach
+distinctive. Grounded in context; no invented facts; honour all compliance notes.
 
-## What You Will Learn
-Bullet list of 4–6 concrete competencies or modules drawn from the context.
+## What's Included
+Bullet list of 4–6 concrete elements, features, or steps drawn from the context.
 
-## Study Format
-Describe full-time / part-time / dual-study options available. Flag dual-study explicitly if supported.
+## Who It's For
+2–3 sentences describing the intended audience and when this offering is (and is not) a fit.
 
-## Career Outcomes
-2–3 sentences backed by specific roles, sectors, or statistics present in the context.
-
-## Entry Requirements
-Concise bullet list: academic background, language proficiency, work experience (if applicable).
+## What To Expect
+2–3 sentences on the process, timeline, or outcomes — stated factually and, where the brand's
+compliance notes require it, with the appropriate caveats (e.g. results vary, risk statements).
 
 ## Next Step
-One-sentence CTA directing the reader to apply or attend an info session.
+One-sentence CTA consistent with the brand's CTA conventions.
 {_language_block(language)}"""
 
 
 def newsletter_template(kb_context: str, topic: str, language: str = "english") -> str:
     """
-    Write a full HTML-ready newsletter for SRH University.
+    Write ready-to-send newsletter copy for the active brand.
 
-    Use this template for monthly campus updates, programme launch announcements,
-    open-day invitations, or alumni round-ups. Output is structured email copy
-    with a subject line, scannable sections, and a clear CTA — ready to paste
-    into Mailchimp or a similar ESP.
+    Structured email copy with a subject line, scannable sections, and a CTA.
+    All facts come from kb_context; voice and compliance come from the brand.
 
     Args:
-        kb_context: Relevant chunks retrieved from the SRH knowledge base.
-        topic: The newsletter edition theme (e.g. 'April Campus Updates').
+        kb_context: Relevant chunks retrieved for the active brand.
+        topic: The newsletter edition theme.
         language: Output language — 'english' or 'german'. Defaults to 'english'.
-
-    Returns:
-        A formatted prompt string ready to send to the LLM.
     """
     language = _validate_language(language)
-    return f"""You are SRH University's email marketing manager writing a newsletter edition.
+    return f"""You are the email marketing manager for the client brand described in the BRAND PROFILE / knowledge base below.
 Produce complete, ready-to-send newsletter copy on the topic below.
 
-{SRH_VOICE_RULES}
+{BRAND_VOICE_CONTRACT}
 
 --- KNOWLEDGE BASE CONTEXT ---
 {kb_context}
@@ -246,56 +235,38 @@ TOPIC / EDITION THEME: {topic}
 OUTPUT STRUCTURE (use these exact headings, format in Markdown):
 
 HOOK RULE:
-- The subject line and opening sentence must be grounded in a specific SRH fact, event, or
-  alumni result from the context — not a generic "We hope this email finds you well" opener.
+- The subject line and opening sentence must be grounded in a specific fact or event from the
+  context — not a generic "We hope this email finds you well" opener.
 - NEVER open with: "Dear reader,", "We are excited to share…", "In this edition…", or any
   generic newsletter filler.
 
 ## Subject Line
-One punchy subject line (max 9 words). Must create curiosity or state a concrete benefit.
-Write a second option prefixed "A/B:".
+One punchy subject line (max 9 words). Write a second option prefixed "A/B:".
 
 ## Preview Text
 One sentence (max 12 words) shown in the inbox before opening — complement the subject line.
 
 ## Opening
-2–3 sentences. Start with a specific SRH hook (stat, alumni quote, or upcoming event date).
-Warm but direct — the reader is a prospective or current student, not a corporate contact.
+2–3 sentences. Start with a specific brand hook from the context. Warm but direct.
 
-## Section 1 — Campus News & Events
-2–3 short paragraphs covering the most relevant upcoming events or recent news from the context.
-Include dates and locations where available. Use a subheading for each item.
+## Section 1 — News & Updates
+2–3 short paragraphs covering the most relevant items from the context, with a subheading each.
+Include dates and specifics where available.
 
-## Section 2 — Student & Alumni Spotlight
-One named student or alumni story drawn from the knowledge base. Include their role, programme,
-and a direct quote if available. 100–150 words.
+## Section 2 — Spotlight
+One concrete story, proof point, or offering drawn from the knowledge base. 100–150 words.
 
-## Section 3 — Programme Highlight
-Spotlight one SRH programme relevant to the topic. Lead with a concrete outcome (career, skill,
-or stat). 80–120 words. End with a one-line CTA linking to the programme page.
+## Section 3 — Offering Highlight
+Spotlight one offering relevant to the topic. Lead with a concrete, context-grounded benefit.
+80–120 words. End with a one-line CTA consistent with the brand's CTA conventions.
 
 ## Call to Action
 One primary CTA button label + URL placeholder, e.g.:
-**[Register for Open Day →](#)**
-One secondary CTA, e.g.: **[Explore Programmes →](#)**
+**[Book a conversation →](#)**
+One secondary CTA, e.g.: **[Learn more →](#)**
 
 ## Footer
-- Contact: admissions@srh-berlin.de
-- Address: SRH Berlin University of Applied Sciences, Ernst-Reuter-Platz 10, 10587 Berlin
+- Use the brand's real contact details from the context if present; otherwise leave a
+  [contact] placeholder. Never invent an address or email.
 - Unsubscribe placeholder: [Unsubscribe](#)
 {_language_block(language)}"""
-
-
-def render_template(template: str, variables: dict) -> str:
-    """Inject variables into a template string using str.format_map."""
-    pass
-
-
-def build_system_prompt(content_type: str) -> str:
-    """Return the appropriate system-level prompt for the requested content type."""
-    pass
-
-
-def build_user_prompt(content_type: str, context_chunks: list[str], variables: dict) -> str:
-    """Combine retrieved context chunks with user variables into a final user prompt."""
-    pass

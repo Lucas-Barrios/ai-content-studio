@@ -1,7 +1,7 @@
 {
   "agent": {
-    "name": "SRH Content Creator",
-    "description": "AI agent for generating SRH University marketing and admissions content",
+    "name": "AI Content Studio",
+    "description": "AI agent for generating multi-tenant, brand-conditioned marketing content",
     "version": "0.1.0"
   },
   "llm": {

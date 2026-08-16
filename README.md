@@ -1,12 +1,10 @@
-# SRH University AI Content Creator
+# AI Content Studio
 
-A production-oriented AI marketing content workspace for generating SRH-branded content across channels. The system combines a Next.js frontend, a FastAPI backend, OpenAI generation, optional Supabase persistence, RAG ingestion, brand profiles, campaign generation, content repurposing, feedback capture, and a feature-flagged TypeScript prompt framework.
+A production-oriented AI marketing content workspace for generating brand-conditioned content across channels. The system combines a Next.js frontend, a FastAPI backend, OpenAI generation, optional Supabase persistence, RAG ingestion, brand profiles, campaign generation, content repurposing, feedback capture, and a feature-flagged TypeScript prompt framework.
 
 ## Start Here
 
-- **Project scope PDF:** [`PROJECT_SCOPE_DELIVERY_PLAN.pdf`](PROJECT_SCOPE_DELIVERY_PLAN.pdf)
-- **Editable scope source:** [`docs/project_scope_delivery_plan.md`](docs/project_scope_delivery_plan.md)
-- **Uniqueness evidence demo:** [`docs/uniqueness_evidence_demo.md`](docs/uniqueness_evidence_demo.md)
+- **Project scope:** [`docs/project_scope_delivery_plan.md`](docs/project_scope_delivery_plan.md)
 - **Supabase setup:** [`docs/supabase_setup.md`](docs/supabase_setup.md)
 
 ## Architecture
@@ -212,7 +210,7 @@ npm run build
 CLI generation:
 
 ```bash
-python main.py --type blog --topic "AI Ethics at SRH"
+python main.py --type blog --topic "Evidence-based investing"
 python main.py --type social --topic "Open Day June 2026" --extra "Join us 14 June in Berlin"
 python main.py --type program --topic "MSc Applied Data Science and AI"
 python main.py --type newsletter --topic "April Campus Updates"
@@ -307,7 +305,6 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 ```txt
 ai-content-creator/
 ├── README.md
-├── PROJECT_SCOPE_DELIVERY_PLAN.pdf
 ├── api_server.py
 ├── frontend/
 │   ├── app/

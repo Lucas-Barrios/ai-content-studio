@@ -2,7 +2,7 @@ from src.content_pipeline import Pipeline
 
 DIVIDER = "\n" + "─" * 60 + "\n"
 
-pipeline = Pipeline(kb_dir="knowledge_base/primary/")
+pipeline = Pipeline(kb_dir="knowledge_base/meridian_wealth/")
 
 # ── Stage 1: Document ─────────────────────────────────────────────────────────
 print(DIVIDER + "STAGE 1 — DOCUMENT\n")
@@ -12,9 +12,9 @@ print(result)
 # ── Stage 2: Monitor ──────────────────────────────────────────────────────────
 print(DIVIDER + "STAGE 2 — MONITOR\n")
 result = pipeline.monitor(
-    topic="How SRH Prepares Students for the AI Job Market",
+    topic="Why fee-only advice changes the conversation",
     content_type="blog_post",
-    audience="prospective international master's students",
+    audience="the brand's target audience",
 )
 print(result)
 

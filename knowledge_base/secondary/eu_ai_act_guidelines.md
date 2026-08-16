@@ -211,13 +211,13 @@ The EU AI Act specifically identifies **education and vocational training** as a
 - AI that **determines the course of someone's professional life** through educational pathways
 - AI tools used in **recruitment within educational institutions**
 
-**What this means for a university like SRH:**
+**What this means for a deploying organisation:**
 - Using AI to rank or score applicants = likely **high-risk** — requires conformity assessment, technical documentation, human oversight, and FRIA
 - Using AI chatbots for student queries = **limited risk** — transparency obligation only (disclose it's AI)
 - Using AI tools for marketing personalisation = likely **minimal risk** — no additional obligations beyond AI literacy
 - Using AI for staff recruitment screening = **high-risk** — employment category under Annex III
 
-**AI literacy obligation applies universally** — SRH, like all organisations deploying AI systems, must ensure staff have sufficient understanding of the AI systems they use, their risks, and how to operate them responsibly.
+**AI literacy obligation applies universally** — An organisation deploying AI systems, like any other, must ensure staff have sufficient understanding of the AI systems they use, their risks, and how to operate them responsibly.
 
 ---
 

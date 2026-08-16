@@ -35,7 +35,7 @@ When the user clicks `Regenerate with feedback`, the frontend sends the original
 - `feedback`
 - `previousContent`
 
-The Python generation service injects this into the prompt as revision context. This gives the model the previous draft and the reviewer instruction, while still grounding the new draft in the selected SRH knowledge base.
+The Python generation service injects this into the prompt as revision context. This gives the model the previous draft and the reviewer instruction, while still grounding the new draft in the selected brand knowledge base.
 
 ## Architecture Boundary
 

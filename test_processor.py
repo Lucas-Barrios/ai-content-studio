@@ -1,6 +1,6 @@
 from src.document_processor import MarkdownProcessor
 
-processor = MarkdownProcessor("knowledge_base/primary/")
+processor = MarkdownProcessor("knowledge_base/meridian_wealth/")
 docs = processor.process_all()
 
 for doc in docs:

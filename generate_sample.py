@@ -4,7 +4,7 @@ from src.llm_integration import ContentGenerator
 
 # Step 1: Load all primary knowledge base documents
 print("Loading knowledge base...")
-processor = MarkdownProcessor("knowledge_base/primary/")
+processor = MarkdownProcessor("knowledge_base/meridian_wealth/")
 docs = processor.process_all()
 print(f"  {len(docs)} files loaded: {', '.join(d['filename'] for d in docs)}\n")
 
@@ -14,7 +14,7 @@ kb_context = "\n\n---\n\n".join(
 )
 
 # Step 3: Build the prompt
-topic = "Why Choose SRH for AI and Data Science"
+topic = "What a fee-only wealth advisory actually does"
 prompt = blog_post_template(kb_context, topic)
 print(f"Prompt built ({len(prompt)} characters). Sending to OpenAI...\n")
 

@@ -8,23 +8,23 @@ export const campaignPromptExample: PromptBuildContext = {
     language: "english",
     tone: "Professional",
     contentType: "social",
-    brief: "Launch a 4-week campaign for a flexible MBA programme.",
-    audience: "working professionals comparing part-time study options",
+    brief: "Launch a 4-week campaign for the Meridian Core Portfolio.",
+    audience: "private clients comparing fee-only advisory options",
   },
   brand: {
-    name: "SRH University",
-    positioning: "Career-focused university for applied learning and international employability.",
-    voice: "Clear, supportive, credible",
-    toneGuidelines: "Professional and human. Avoid hype.",
-    audienceSummary: "Prospective students and professionals evaluating next career steps.",
-    approvedTerms: ["applied learning", "career outcomes", "international"],
-    bannedTerms: ["guaranteed job", "cheap"],
-    complianceNotes: "Do not imply guaranteed employment.",
+    name: "Meridian Wealth",
+    positioning: "Boutique DACH wealth advisory competing on rigor and transparency, not performance claims.",
+    voice: "Precise, sober, evidence-led",
+    toneGuidelines: "Every claim backed by a mechanism or source. State downside plainly. No hype adjectives.",
+    audienceSummary: "Private clients and family offices; financially literate, time-poor, skeptical of hype.",
+    approvedTerms: ["diversified", "evidence-based", "risk-adjusted", "capital preservation"],
+    bannedTerms: ["guaranteed", "risk-free", "beat the market", "double your money"],
+    complianceNotes: "Financial promotion. Past performance is not a reliable indicator of future results; value can fall as well as rise. Marketing only, not personal advice.",
   },
   campaign: {
-    goal: "Increase MBA information-session registrations",
-    offer: "Flexible MBA programme",
-    audience: "working professionals",
+    goal: "Increase portfolio-review consultations",
+    offer: "Meridian Core Portfolio",
+    audience: "private clients evaluating a fee-only advisory",
     channels: ["linkedin", "email"],
     startDate: "2026-06-01",
     endDate: "2026-06-30",
@@ -32,13 +32,13 @@ export const campaignPromptExample: PromptBuildContext = {
   ragDocuments: [
     {
       id: "kb_1",
-      title: "Career outcomes",
-      content: "SRH programmes emphasise applied projects, industry relevance, and international career preparation.",
+      title: "Fee structure",
+      content: "Meridian charges a single all-in annual advisory fee in basis points, disclosed before onboarding. No performance fees, no product commissions, no retrocessions.",
       sourceKind: "brand",
       contentType: "program",
       language: "english",
       channel: "website",
-      tags: ["career", "programme"],
+      tags: ["fees", "transparency"],
       similarity: 0.84,
     },
   ],
@@ -50,7 +50,7 @@ export const socialPromptExample: PromptBuildContext = {
   userInput: {
     ...campaignPromptExample.userInput,
     channel: "linkedin",
-    topic: "Balancing MBA study with full-time work",
+    topic: "What a fee-only advisory fee actually covers",
   },
 };
 
@@ -60,7 +60,7 @@ export const emailPromptExample: PromptBuildContext = {
   userInput: {
     ...campaignPromptExample.userInput,
     channel: "email",
-    topic: "Invite prospective students to an MBA info session",
+    topic: "Invite private clients to a portfolio review",
   },
 };
 
@@ -69,15 +69,15 @@ export function buildExamplePrompt() {
 }
 
 export function sampleUniquenessReport() {
-  const systemOutput = `For working professionals, the real MBA question is not "Can I study?" It is "Can this fit the career I am already building?"
+  const systemOutput = `For a private investor, the real question is rarely "what return can I get?" It is "who is paying whom, and for what?"
 
-SRH's applied learning model is designed around practical projects, international perspective, and career-relevant study. That means the programme speaks to people who need more than theory: they need learning they can connect to current decisions at work.
+Meridian's fee-only model means its revenue comes solely from a single disclosed advisory fee — no performance fees, no product commissions, no retrocessions. That structure removes the hidden incentive that can quietly shape advice elsewhere.
 
-If you are comparing part-time MBA options, start with one filter: will the programme help you practise the work you want to do next?
+Past performance is not a reliable indicator of future results, and the value of investments can fall as well as rise. What Meridian offers instead is clarity: you always know what you own and why.
 
-Join the next information session to explore the flexible MBA path.`;
+Book a portfolio review to see how a transparent, evidence-based mandate would fit your circumstances.`;
 
-  const baselineOutput = `In today's fast-paced world, an MBA can help you take your career to the next level. Our flexible programme offers innovative solutions for professionals who want to grow. Join our information session to learn more.`;
+  const baselineOutput = `In today's fast-paced world, growing your wealth has never been more important. Our expert team offers innovative solutions with great returns for investors who want to get ahead. Contact us today to learn more!`;
 
   return evaluateUniqueness(systemOutput, baselineOutput);
 }

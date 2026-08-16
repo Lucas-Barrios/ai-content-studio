@@ -1,7 +1,7 @@
 """
 knowledge_base.py
 
-Manages the vector store and retrieval layer for SRH University content.
+Manages the vector store and retrieval layer for brand content.
 Responsibilities:
   - Index processed document chunks (primary and secondary sources)
   - Store and load embeddings from disk

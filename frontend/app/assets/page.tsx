@@ -16,7 +16,7 @@ export default function AssetsPage() {
   const [outputs, setOutputs] = useState<GeneratedOutputRecord[]>([]);
 
   useEffect(() => {
-    const raw = window.localStorage.getItem("srh-content-history");
+    const raw = window.localStorage.getItem("brand-content-history");
     if (!raw) return;
     try {
       setHistory(JSON.parse(raw) as HistoryItem[]);

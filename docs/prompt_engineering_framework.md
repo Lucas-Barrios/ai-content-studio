@@ -51,7 +51,7 @@ const result = await runPromptPipeline(socialPromptExample, {
 
 ## Sample Uniqueness Report
 
-The example in `sampleUniquenessReport()` compares an SRH-specific output with a generic baseline and returns:
+The example in `sampleUniquenessReport()` compares a brand-specific output with a generic baseline and returns:
 
 ```json
 {

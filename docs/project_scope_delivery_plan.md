@@ -1,12 +1,12 @@
 # AI Marketing Content Platform - Project Scope and Final Delivery Plan
 
-Prepared for: SRH University AI Content Creator / AI Marketing Content OS  
+Prepared for: AI Content Studio / Multi-Tenant Marketing Content OS  
 Date: May 6, 2026  
 Current status: Working local product with Next.js frontend, FastAPI backend, OpenAI generation, Supabase-ready database design, RAG ingestion, prompt framework, campaigns, repurposing, and feedback loop foundations.
 
 ## 1. Executive Summary
 
-This project has evolved from a basic AI content generator into a multi-feature AI marketing content workspace. The current system can generate marketing content, use SRH knowledge-base files, support a modern Next.js interface, connect to a Python API backend, ingest knowledge sources for RAG, manage brand profile data, create campaigns, repurpose content, capture feedback, and evaluate uniqueness against generic model outputs.
+This project has evolved from a basic AI content generator into a multi-feature AI marketing content workspace. The current system can generate marketing content, use per-tenant knowledge-base files, support a modern Next.js interface, connect to a Python API backend, ingest knowledge sources for RAG, manage brand profile data, create campaigns, repurpose content, capture feedback, and evaluate uniqueness against generic model outputs.
 
 The strategic product direction is an AI marketing content operating system for small and medium-sized organizations. The business value is time savings, better brand consistency, safer use of AI-generated content, and reusable knowledge memory across marketing workflows.
 

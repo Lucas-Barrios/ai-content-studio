@@ -115,12 +115,12 @@ def test_formatting_helpers() -> None:
         "status": "approved",
         "createdAt": "2026-05-05T00:00:00Z",
     }
-    assert safe_download_filename("SRH Content: AI / Berlin") == "srh-content-ai-berlin"
+    assert safe_download_filename("Brand Content: AI / Berlin") == "brand-content-ai-berlin"
 
 
 def test_prompt_helper() -> None:
     prompt = build_chat_prompt([Message("user", "Make this shorter")])
-    assert "SRH marketing content assistant" in prompt
+    assert "brand marketing content assistant" in prompt
     assert "user: Make this shorter" in prompt
 
     content_prompt = create_content_prompt("blog", "Context", "AI Ethics", "english")
@@ -145,11 +145,12 @@ def test_document_helpers() -> None:
 
 
 def test_generation_service_helpers() -> None:
-    doc = {"filename": "brand.md", "content": "SRH brand content"}
+    doc = {"filename": "brand.md", "content": "brand content"}
     assert format_knowledge_base_document(doc).startswith("### brand.md")
     assert format_knowledge_base_section("PRIMARY", [doc]).startswith("## PRIMARY")
     assert combine_knowledge_base_sections(["one", "two"]) == "one\n\n===\n\ntwo"
-    assert source_type_from_path("knowledge_base/primary") == "primary"
+    assert source_type_from_path("knowledge_base/meridian_wealth") == "primary"
+    assert source_type_from_path("knowledge_base/secondary") == "secondary"
     assert build_source_files([doc], "primary")[0].filename == "brand.md"
     assert safe_upload_name("../brief.md") == "brief.md"
 

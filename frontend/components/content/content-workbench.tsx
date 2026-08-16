@@ -100,19 +100,17 @@ export function ContentWorkbench() {
               <Badge variant="outline">Brand consistency</Badge>
             </div>
             <h2 className="text-balance text-2xl font-semibold tracking-tight md:text-3xl">
-              SRH University Content Generation System
+              AI Content Studio
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              Choose a content type, add your topic, and the system uses SRH knowledge-base sources to create
+              Choose a content type, add your topic, and the system uses the selected brand&apos;s knowledge-base sources to create
               clear, on-brand marketing content.
             </p>
           </div>
-          <div className="flex justify-start lg:justify-end">
-            <img
-              src="/srh_logo.png"
-              alt="SRH logo"
-              className="h-16 w-auto object-contain md:h-20"
-            />
+          <div className="flex items-center justify-start lg:justify-end">
+            <span className="rounded-md border px-3 py-1.5 text-sm font-semibold tracking-tight text-foreground/80">
+              AI Content Studio
+            </span>
           </div>
         </CardContent>
       </Card>

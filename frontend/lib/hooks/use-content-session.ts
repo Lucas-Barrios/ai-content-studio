@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { defaultRequest } from "@/lib/constants";
 import type { GenerateRequest, GenerateResponse, HistoryItem, UploadedFile } from "@/lib/types";
 
-const historyKey = "srh-content-history";
+const historyKey = "brand-content-history";
 
 export function useContentSession() {
   const [request, setRequest] = useState<GenerateRequest>(defaultRequest);

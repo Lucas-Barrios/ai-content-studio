@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
@@ -53,11 +52,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex h-full flex-col">
             <div className="flex items-center gap-3 px-5 py-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white">
-                <Image src="/srh_logo.png" width={38} height={38} alt="SRH logo" priority />
+                <span className="text-lg font-bold tracking-tight text-neutral-950">AC</span>
               </div>
               <div>
-                <div className="font-semibold leading-tight">AI Marketing OS</div>
-                <div className="text-xs text-white/55">SME content workspace</div>
+                <div className="font-semibold leading-tight">AI Content Studio</div>
+                <div className="text-xs text-white/55">Multi-tenant content workspace</div>
               </div>
             </div>
             <Separator className="bg-white/10" />

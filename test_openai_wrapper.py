@@ -61,12 +61,12 @@ def make_wrapper(completions: FakeCompletions, max_retries: int = 3) -> OpenAIWr
 
 
 def test_success_response() -> None:
-    completions = FakeCompletions(content="SRH generated content")
+    completions = FakeCompletions(content="generated content")
     wrapper = make_wrapper(completions)
     result = wrapper.generate_description("Write content")
 
     assert result["status"] == "success"
-    assert result["content"] == "SRH generated content"
+    assert result["content"] == "generated content"
     assert result["attempts"] == 1
     assert result["model"] == "test-model"
 

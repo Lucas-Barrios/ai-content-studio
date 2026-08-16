@@ -42,12 +42,12 @@ class FakeGenerationClient implements LegacyGenerationClient {
   throwOnGenerateText = false;
 
   async generate(payload: GenerateRequest): Promise<GenerateResponse> {
-    return response(payload, "legacy output with concrete SRH context", "legacy-python");
+    return response(payload, "legacy output with concrete brand context", "legacy-python");
   }
 
   async generateText(input: { system?: string; prompt: string; metadata?: Record<string, unknown> }): Promise<string> {
     if (this.throwOnGenerateText) throw new Error("framework failed");
-    return `new framework output using ${String(input.metadata?.variantId ?? "default")} with specific SRH audience context`;
+    return `new framework output using ${String(input.metadata?.variantId ?? "default")} with specific brand audience context`;
   }
 
   async getBrandProfile(): Promise<BrandProfile | null> {

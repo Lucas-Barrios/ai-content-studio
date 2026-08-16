@@ -58,7 +58,7 @@ class MarkdownProcessor:
             logger.error("Knowledge base path is not a directory: %s", directory)
             raise NotADirectoryError(
                 f"'{directory}' is a file, not a directory.\n"
-                "  Fix: pass the folder path, e.g. 'knowledge_base/primary/'"
+                "  Fix: pass the folder path, e.g. 'knowledge_base/meridian_wealth/'"
             )
         self.directory = directory
         self.files: list[dict] = []

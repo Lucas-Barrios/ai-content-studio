@@ -87,7 +87,7 @@ rate_limiter = InMemoryRateLimiter(
     window_seconds=security_settings.rate_limit_window_seconds,
 )
 
-app = FastAPI(title="SRH AI Content Creator API", version="1.0.0")
+app = FastAPI(title="AI Content Studio API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -126,7 +126,7 @@ class UploadedFileBody(BaseModel):
 class GenerateBody(BaseModel):
     content_type: Optional[str] = Field(default=None, alias="contentType")
     topic: str = Field(min_length=2, max_length=500)
-    audience: str = Field(default="Prospective Students", max_length=200)
+    audience: str = Field(default="Target Audience", max_length=200)
     language: str = "english"
     tone: str = Field(default="Professional", max_length=80)
     length: str = "Medium"
@@ -147,7 +147,7 @@ class FeedbackBody(BaseModel):
 
 class ContentArtifactBody(BaseModel):
     content: str = Field(min_length=1, max_length=80_000)
-    topic: str = Field(default="SRH Content", max_length=200)
+    topic: str = Field(default="Content", max_length=200)
 
 
 class ChatMessage(BaseModel):

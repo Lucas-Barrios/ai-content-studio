@@ -78,7 +78,7 @@ export function InputPanel({
           <Input
             id="topic"
             value={request.topic}
-            placeholder="e.g. AI Ethics at SRH"
+            placeholder="e.g. Evidence-based investing"
             onChange={(event) => onChange("topic", event.target.value)}
           />
           <div className="grid grid-cols-2 gap-2">
@@ -189,7 +189,7 @@ export function InputPanel({
 
         <Button type="button" className="w-full" size="lg" onClick={onSubmit} disabled={isLoading || !request.topic.trim()}>
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {isLoading ? "Generating..." : "Generate with SRH context"}
+          {isLoading ? "Generating..." : "Generate with brand context"}
         </Button>
       </CardContent>
     </Card>

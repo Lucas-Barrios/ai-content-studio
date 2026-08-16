@@ -94,7 +94,7 @@ def feedback_record_to_response(record: FeedbackRecordLike) -> dict[str, Any]:
     }
 
 
-def safe_download_filename(topic: str, fallback: str = "srh-content") -> str:
+def safe_download_filename(topic: str, fallback: str = "brand-content") -> str:
     """Create a conservative download filename stem from a topic."""
     source = topic.strip().lower() or fallback
     filename = "".join(char if char.isalnum() or char in {"-", "_"} else "-" for char in source)
@@ -108,7 +108,7 @@ def build_chat_prompt(messages: list[ChatMessageLike], max_messages: int = 8) ->
 
     transcript = "\n".join(f"{message.role}: {message.content}" for message in messages[-max_messages:])
     return (
-        "You are an SRH marketing content assistant. Help revise, shorten, repurpose, "
+        "You are a brand marketing content assistant. Help revise, shorten, repurpose, "
         "or improve content while staying professional and specific.\n\n"
         f"Conversation:\n{transcript}\n\nAssistant:"
     )

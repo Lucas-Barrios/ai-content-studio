@@ -8,14 +8,14 @@ export const contentTypeOptions: Array<{ label: string; value: ContentType; desc
 ];
 
 export const topicSuggestions: Record<ContentType, string[]> = {
-  blog: ["AI Ethics at SRH", "Why Study in Berlin?", "The CORE Principle", "Careers in Data Science"],
-  social: ["Open Day June 2026", "New AI Programme", "Student Success Story", "Berlin Campus Life"],
-  social_post: ["Open Day June 2026", "New AI Programme", "Student Success Story", "Berlin Campus Life"],
-  program: ["MSc Applied Data Science and AI", "Executive MBA", "BSc Computer Science", "MSc Big Data & Analytics"],
-  newsletter: ["April Campus Updates", "New Programme Launch", "Alumni Success Stories", "Open Day Invitation"],
-  email: ["April Campus Updates", "New Programme Launch", "Alumni Success Stories", "Open Day Invitation"],
-  ad: ["Open Day Registration", "Executive MBA Applications", "Berlin Study Advantage", "Career-Focused Learning"],
-  ad_copy: ["Open Day Registration", "Executive MBA Applications", "Berlin Study Advantage", "Career-Focused Learning"]
+  blog: ["Evidence-based investing", "What fee-only advice means", "Diversification and risk", "Planning for a liquidity event"],
+  social: ["Fee transparency explained", "Why past performance isn't a promise", "Meet the investment committee", "Booking a portfolio review"],
+  social_post: ["Fee transparency explained", "Why past performance isn't a promise", "Meet the investment committee", "Booking a portfolio review"],
+  program: ["Meridian Core Portfolio", "Meridian Income", "Meridian Succession", "Injectable wrinkle relaxation"],
+  newsletter: ["Quarterly market note", "Fee structure explainer", "Succession planning basics", "Consultation-first care"],
+  email: ["Quarterly market note", "Fee structure explainer", "Succession planning basics", "Consultation-first care"],
+  ad: ["Book a portfolio review", "Fee-only advisory", "Natural-looking results", "Book a consultation"],
+  ad_copy: ["Book a portfolio review", "Fee-only advisory", "Natural-looking results", "Book a consultation"]
 };
 
 export const audienceOptions = [
@@ -36,8 +36,8 @@ export const languageOptions: Array<{ label: string; value: Language }> = [
 ];
 
 export const knowledgeBaseOptions: Array<{ label: string; value: KnowledgeBaseSource; description: string }> = [
-  { label: "Hybrid", value: "hybrid", description: "Primary SRH sources plus market context" },
-  { label: "Primary", value: "primary", description: "Official SRH source material only" },
+  { label: "Hybrid", value: "hybrid", description: "Primary brand sources plus market context" },
+  { label: "Primary", value: "primary", description: "Official brand source material only" },
   { label: "Secondary", value: "secondary", description: "Market and benchmark context only" }
 ];
 

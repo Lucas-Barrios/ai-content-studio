@@ -1,9 +1,9 @@
 """
 main.py
 
-CLI entry point for the SRH University AI Content Creator.
+CLI entry point for the AI Content Studio.
 Usage:
-  python -m src.main --type blog_post --topic "Applied AI programs" --audience "prospective students"
+  python -m src.main --type blog_post --topic "Applied AI programs" --audience "the brand's target audience"
 
 Responsibilities:
   - Parse command-line arguments

@@ -4,7 +4,7 @@ set -euo pipefail
 VENV_DIR="venv"
 PYTHON="${PYTHON:-python3}"
 
-echo "=== SRH AI Content Creator — Setup ==="
+echo "=== AI Content Studio — Setup ==="
 echo ""
 
 # ── 1. Check Python ────────────────────────────────────────────────────────────

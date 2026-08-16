@@ -1,4 +1,4 @@
-# SRH AI Content Creator Frontend
+# AI Content Studio — Frontend
 
 Production Next.js frontend for the Python AI content generation backend.
 
@@ -31,7 +31,6 @@ frontend/
 │   ├── types.ts
 │   └── utils.ts
 └── public/
-    └── srh_logo.png
 ```
 
 ## Backend Contract

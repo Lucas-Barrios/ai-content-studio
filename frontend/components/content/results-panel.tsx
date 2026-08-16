@@ -107,7 +107,7 @@ export function ResultsPanel({
                   variant="outline"
                   size="sm"
                   disabled={!content}
-                  onClick={() => downloadMarkdown(content, `srh-${response?.metadata.contentType ?? "content"}.md`)}
+                  onClick={() => downloadMarkdown(content, `content-${response?.metadata.contentType ?? "content"}.md`)}
                 >
                   <Download className="h-4 w-4" />
                   Markdown

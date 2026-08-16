@@ -28,9 +28,9 @@ def assert_contains(text: str, expected: list[str]) -> None:
 def test_valid_json_load() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         path = Path(temp_dir) / "valid.json"
-        path.write_text('{"topic": "AI Ethics at SRH", "price": 99.99}', encoding="utf-8")
+        path.write_text('{"topic": "Evidence-based investing", "price": 99.99}', encoding="utf-8")
         result = load_json_file(path)
-        assert result == {"topic": "AI Ethics at SRH", "price": 99.99}
+        assert result == {"topic": "Evidence-based investing", "price": 99.99}
 
 
 def test_missing_json_error() -> None:
@@ -72,8 +72,8 @@ def test_valid_generate_endpoint_same_response_shape() -> None:
 
     def fake_generate_content(_request: Any) -> GenerateContentResult:
         return GenerateContentResult(
-            content="Generated SRH content",
-            sources=[SourceFile(filename="srh_brand_guidelines.md", words=100, source="primary")],
+            content="Generated content",
+            sources=[SourceFile(filename="brand_guidelines.md", words=100, source="primary")],
             brief="Brief content",
         )
 
@@ -83,8 +83,8 @@ def test_valid_generate_endpoint_same_response_shape() -> None:
             "/generate",
             json={
                 "contentType": "blog",
-                "topic": "AI Ethics at SRH",
-                "audience": "Prospective Students",
+                "topic": "Evidence-based investing",
+                "audience": "Target Audience",
                 "language": "english",
                 "tone": "Professional",
                 "length": "Medium",
@@ -97,8 +97,8 @@ def test_valid_generate_endpoint_same_response_shape() -> None:
     assert response.status_code == 200, response.text
     body = response.json()
     assert body == {
-        "content": "Generated SRH content",
-        "sources": [{"filename": "srh_brand_guidelines.md", "words": 100, "source": "primary"}],
+        "content": "Generated content",
+        "sources": [{"filename": "brand_guidelines.md", "words": 100, "source": "primary"}],
         "brief": "Brief content",
     }
 
@@ -130,7 +130,7 @@ def test_api_error_details() -> None:
             "/generate",
             json={
                 "contentType": "blog",
-                "topic": "AI Ethics at SRH",
+                "topic": "Evidence-based investing",
                 "language": "english",
                 "knowledgeBase": "primary",
                 "length": "Medium",

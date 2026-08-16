@@ -34,7 +34,7 @@ Frontend `frontend/.env.local`:
 
 ```bash
 PYTHON_API_BASE_URL=http://localhost:8000
-NEXT_PUBLIC_APP_NAME=SRH AI Content Creator
+NEXT_PUBLIC_APP_NAME=AI Content Studio
 NEXT_PUBLIC_SUPABASE_URL=https://afjfbvmtdukyjcpuudcl.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_or_anon_key_here
 ```

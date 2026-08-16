@@ -1,9 +1,9 @@
 """
-main.py — SRH AI Content Creator
+main.py — AI Content Studio
 Demo entry point for the presentation.
 
 Usage:
-  python main.py --type blog    --topic "AI Ethics at SRH"
+  python main.py --type blog    --topic "Evidence-based investing"
   python main.py --type social  --topic "Open Day June 2026" --extra "Join us on 14 June"
   python main.py --type program --topic "MSc Applied Data Science and AI"
   python main.py --type demo
@@ -96,7 +96,7 @@ def _publish_and_save(pipeline: Pipeline, content_type: str, topic: str, languag
 
 def run_blog(pipeline: Pipeline, topic: str, extra: str, language: str) -> None:
     print(banner("Stage 2 — Monitor"))
-    print(pipeline.monitor(topic=topic, content_type="blog", audience="prospective international students", extra=extra))
+    print(pipeline.monitor(topic=topic, content_type="blog", audience="the brand's target audience", extra=extra))
 
     print(banner("Stage 3 — Brief"))
     print(pipeline.brief())
@@ -108,7 +108,7 @@ def run_blog(pipeline: Pipeline, topic: str, extra: str, language: str) -> None:
 def run_social(pipeline: Pipeline, topic: str, extra: str, language: str) -> None:
     announcement = extra or topic
     print(banner("Stage 2 — Monitor"))
-    print(pipeline.monitor(topic=topic, content_type="social", audience="prospective students", extra=announcement))
+    print(pipeline.monitor(topic=topic, content_type="social", audience="the brand's target audience", extra=announcement))
 
     print(banner("Stage 3 — Brief"))
     print(pipeline.brief())
@@ -120,7 +120,7 @@ def run_social(pipeline: Pipeline, topic: str, extra: str, language: str) -> Non
 def run_program(pipeline: Pipeline, topic: str, extra: str, language: str) -> None:
     program_name = extra or topic
     print(banner("Stage 2 — Monitor"))
-    print(pipeline.monitor(topic=topic, content_type="program", audience="prospective students", extra=program_name))
+    print(pipeline.monitor(topic=topic, content_type="program", audience="the brand's target audience", extra=program_name))
 
     print(banner("Stage 3 — Brief"))
     print(pipeline.brief())
@@ -131,7 +131,7 @@ def run_program(pipeline: Pipeline, topic: str, extra: str, language: str) -> No
 
 def run_newsletter(pipeline: Pipeline, topic: str, language: str) -> None:
     print(banner("Stage 2 — Monitor"))
-    print(pipeline.monitor(topic=topic, content_type="newsletter", audience="prospective and current students"))
+    print(pipeline.monitor(topic=topic, content_type="newsletter", audience="the brand's target audience"))
 
     print(banner("Stage 3 — Brief"))
     print(pipeline.brief())
@@ -142,10 +142,10 @@ def run_newsletter(pipeline: Pipeline, topic: str, language: str) -> None:
 
 def run_demo(pipeline: Pipeline, language: str) -> None:
     """Walk through all five pipeline stages with a preset topic."""
-    topic = "How SRH Prepares Students for Careers in AI"
+    topic = "Why fee-only advice changes the conversation"
 
     print(banner("Stage 2 — Monitor"))
-    print(pipeline.monitor(topic=topic, content_type="blog", audience="prospective international master's students"))
+    print(pipeline.monitor(topic=topic, content_type="blog", audience="the brand's target audience"))
 
     print(banner("Stage 3 — Brief"))
     print(pipeline.brief())
@@ -160,11 +160,11 @@ def run_demo(pipeline: Pipeline, language: str) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="SRH AI Content Creator",
+        description="AI Content Studio",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 examples:
-  python main.py --type blog    --topic "AI Ethics at SRH"
+  python main.py --type blog    --topic "Evidence-based investing"
   python main.py --type social  --topic "Open Day June 2026" --extra "Join us 14 June in Berlin"
   python main.py --type program --topic "MSc Applied Data Science and AI"
   python main.py --type demo
@@ -184,8 +184,8 @@ examples:
     )
     parser.add_argument(
         "--kb",
-        default="knowledge_base/primary/",
-        help="Path to knowledge base directory (default: knowledge_base/primary/)",
+        default="knowledge_base/meridian_wealth/",
+        help="Path to knowledge base directory (default: knowledge_base/meridian_wealth/)",
     )
     parser.add_argument(
         "--language",
@@ -200,7 +200,7 @@ def main() -> None:
     args = parse_args()
     check_env()
 
-    print(banner(f"SRH AI Content Creator — {CONTENT_LABELS[args.type]}"))
+    print(banner(f"AI Content Studio — {CONTENT_LABELS[args.type]}"))
 
     # Stage 1: Document (always runs)
     print(banner("Stage 1 — Document"))
