@@ -120,3 +120,16 @@ TENANTS = {
         "disclosures": LUMEN_DISCLOSURES,
     },
 }
+
+
+# ── Short voice descriptors (for the brand-voice judge) ──────────────────────
+VOICE_SUMMARY = {
+    "meridian_wealth": (
+        "Precise, sober, evidence-led, candid about risk. Confident but never "
+        "promotional. Every claim backed by a mechanism or source; downside stated plainly."
+    ),
+    "lumen_aesthetics": (
+        "Warm, reassuring, consent-first, plain-language. Honest about limits — states "
+        "what a treatment cannot do as clearly as what it can. Never salesy or clinical-cold."
+    ),
+}

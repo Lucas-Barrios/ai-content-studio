@@ -52,13 +52,16 @@ class EvalLLM:
             from openai import OpenAI
             self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", ""))
 
-    def complete(self, prompt: str, temperature: float = 0.7) -> LLMResult:
-        resp = self.client.chat.completions.create(
+    def complete(self, prompt: str, temperature: float = 0.7, json_mode: bool = False) -> LLMResult:
+        kwargs = dict(
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=self.max_tokens,
             temperature=temperature,
         )
+        if json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+        resp = self.client.chat.completions.create(**kwargs)
         usage = resp.usage
         pt = getattr(usage, "prompt_tokens", 0) or 0
         ct = getattr(usage, "completion_tokens", 0) or 0
@@ -70,3 +73,21 @@ class EvalLLM:
             completion_tokens=ct,
             cost_usd=estimate_cost(self.model, pt, ct),
         )
+
+    def complete_json(self, prompt: str, temperature: float = 0.0) -> tuple[dict, LLMResult]:
+        """Judge call: temperature 0, JSON mode, tolerant parse. Returns ({}, res) on parse failure."""
+        import json as _json
+        import re as _re
+
+        res = self.complete(prompt, temperature=temperature, json_mode=True)
+        text = res.content.strip()
+        try:
+            return _json.loads(text), res
+        except Exception:
+            m = _re.search(r"\{.*\}", text, _re.DOTALL)
+            if m:
+                try:
+                    return _json.loads(m.group(0)), res
+                except Exception:
+                    pass
+            return {}, res

@@ -16,7 +16,7 @@ from brand conditioning + RAG grounding + the template, not from a model change.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from evals.llm import EvalLLM
 
@@ -42,7 +42,9 @@ class Generation:
     completion_tokens: int
     cost_usd: float
     retrieved_k: int = 0
+    retrieved_context: str = ""
     error: str | None = None
+    warnings: list[str] = field(default_factory=list)
 
 
 def baseline_prompt(case: dict) -> str:
@@ -62,17 +64,26 @@ def _format_chunks(chunks: list[dict]) -> str:
     return "\n\n".join(lines)
 
 
-def system_prompt(case: dict) -> tuple[str, int]:
-    """Full pipeline prompt: brand block + retrieved KB chunks + brand-neutral template."""
+def system_prompt(case: dict) -> tuple[str, int, list[str], str]:
+    """Full pipeline prompt: brand block + retrieved KB chunks + brand-neutral template.
+
+    Returns (prompt, retrieved_k, warnings, retrieved_context). Warnings flag silent
+    degradation — an empty brand block or zero retrieved chunks means the 'system' arm
+    is not actually running as the system, and its scores should not be trusted.
+    retrieved_context is the raw chunk text, used by the groundedness judge.
+    """
     from src import prompt_templates as T
     from src.brand_intelligence import assemble_brand_block, retrieve_brand_context
     from src.rag_ingestion import search_knowledge_chunks
 
     topic = case["topic"]
     client_id = case["client_id"]
+    warnings: list[str] = []
 
     ctx = retrieve_brand_context(topic=topic, client_id=client_id)
     brand_block = assemble_brand_block(ctx) if ctx else ""
+    if not brand_block.strip():
+        warnings.append("empty_brand_block")
 
     chunks = search_knowledge_chunks(
         query=topic,
@@ -81,8 +92,10 @@ def system_prompt(case: dict) -> tuple[str, int]:
         # The code default (0.72) is too strict for text-embedding-3-small, whose
         # on-topic cosine sims run ~0.3-0.5; at 0.72 retrieval returns almost nothing.
         # Favour recall here; Step 3 (reranking) restores precision.
-        match_threshold=0.30,
+        match_threshold=0.15,
     )
+    if not chunks:
+        warnings.append("zero_chunks_retrieved")
     kb_body = _format_chunks(chunks)
 
     kb_context = ""
@@ -92,7 +105,7 @@ def system_prompt(case: dict) -> tuple[str, int]:
 
     template_fn = getattr(T, _TEMPLATES.get(case["content_type"], "blog_post_template"))
     prompt = template_fn(kb_context, topic, case.get("language", "english"))
-    return prompt, len(chunks)
+    return prompt, len(chunks), warnings, kb_body
 
 
 def generate(arm: str, case: dict, llm: EvalLLM) -> Generation:
@@ -104,16 +117,16 @@ def generate(arm: str, case: dict, llm: EvalLLM) -> Generation:
     try:
         if arm == "baseline":
             res = llm.complete(baseline_prompt(case))
-            k = 0
+            k, warnings, retrieved = 0, [], ""
         elif arm == "system":
-            prompt, k = system_prompt(case)
+            prompt, k, warnings, retrieved = system_prompt(case)
             res = llm.complete(prompt)
         else:
             raise ValueError(f"unknown arm '{arm}'")
         return Generation(
             **base, content=res.content, model=res.model,
             prompt_tokens=res.prompt_tokens, completion_tokens=res.completion_tokens,
-            cost_usd=res.cost_usd, retrieved_k=k,
+            cost_usd=res.cost_usd, retrieved_k=k, retrieved_context=retrieved, warnings=warnings,
         )
     except Exception as exc:  # noqa: BLE001 — a failed generation shouldn't kill the run
         return Generation(
