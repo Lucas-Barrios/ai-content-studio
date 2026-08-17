@@ -1,0 +1,4 @@
+# Run artifacts (timestamped JSON + mock runs) are not committed.
+# The curated real scorecard is committed explicitly.
+eval_*.json
+eval_mock_*
