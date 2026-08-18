@@ -201,10 +201,17 @@ def run(arms: list[str], cases: list[dict], mock: bool, judge: bool = True) -> d
             print(f"  [{flags}] {arm:<8} {case['id']:<14} k={gen.retrieved_k}{warn}")
 
     # Second pass: LLM judges (kept separate so a judge failure can't lose generations).
+    # Judge model defaults to a stronger, different model than the generator
+    # (gpt-4o vs gpt-4o-mini) to reduce self-preference bias; override with JUDGE_MODEL
+    # (e.g. a cross-provider model) for stricter independence.
+    judge_model = None
     if judge and not mock:
+        import os
+
         from evals.llm import EvalLLM
-        jllm = EvalLLM()
-        print("Judging ...")
+        judge_model = os.getenv("JUDGE_MODEL", "gpt-4o")
+        jllm = EvalLLM(model=judge_model)
+        print(f"Judging with {judge_model} ...")
         for row in rows:
             if row.get("error"):
                 continue
@@ -217,11 +224,14 @@ def run(arms: list[str], cases: list[dict], mock: bool, judge: bool = True) -> d
             print(f"  [judge] {row['arm']:<8} {row['case_id']:<14} claim={mark}")
 
     summary = {arm: aggregate(rows, arm) for arm in arms}
+    gen_model = None if mock else (llm.model if llm else None)
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "n_cases": len(cases),
         "arms": arms,
         "mock": mock,
+        "generation_model": gen_model,
+        "judge_model": judge_model,
         "summary": summary,
         "rows": rows,
     }
@@ -230,7 +240,8 @@ def run(arms: list[str], cases: list[dict], mock: bool, judge: bool = True) -> d
 def render_scorecard(report: dict) -> str:
     s = report["summary"]
     lines = ["# Eval Scorecard", "", f"_Generated {report['generated_at']} · "
-             f"{report['n_cases']} cases · mock={report['mock']}_", ""]
+             f"{report['n_cases']} cases · mock={report['mock']}_",
+             f"_Generation: {report.get('generation_model')} · Judge: {report.get('judge_model')}_", ""]
     metrics = [
         ("Banned-term violation rate (raw, context-blind)", "banned_term_violation_rate_raw", "lower"),
         ("True violation rate (judge, context-aware)", "true_violation_rate_judged", "lower"),

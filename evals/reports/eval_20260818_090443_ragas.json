@@ -1,0 +1,137 @@
+{
+  "report": "evals/reports/eval_20260818_090443.json",
+  "model": "gpt-4o-mini",
+  "n": 32,
+  "ragas_faithfulness_mean": 0.7758,
+  "our_groundedness_mean": 0.95,
+  "per_case": [
+    {
+      "case_id": "mw-blog-001",
+      "faithfulness": 0.7407
+    },
+    {
+      "case_id": "mw-blog-002",
+      "faithfulness": 1.0
+    },
+    {
+      "case_id": "mw-blog-003",
+      "faithfulness": 0.8936
+    },
+    {
+      "case_id": "mw-news-001",
+      "faithfulness": 0.4828
+    },
+    {
+      "case_id": "mw-prog-001",
+      "faithfulness": 0.7714
+    },
+    {
+      "case_id": "mw-prog-002",
+      "faithfulness": 0.871
+    },
+    {
+      "case_id": "mw-social-001",
+      "faithfulness": 0.6
+    },
+    {
+      "case_id": "mw-social-002",
+      "faithfulness": 0.7273
+    },
+    {
+      "case_id": "mw-blog-004",
+      "faithfulness": 0.9184
+    },
+    {
+      "case_id": "mw-social-003",
+      "faithfulness": 0.6667
+    },
+    {
+      "case_id": "mw-news-002",
+      "faithfulness": 0.3913
+    },
+    {
+      "case_id": "mw-blog-005",
+      "faithfulness": 0.8679
+    },
+    {
+      "case_id": "mw-adv-001",
+      "faithfulness": 0.7692
+    },
+    {
+      "case_id": "mw-adv-002",
+      "faithfulness": 0.5538
+    },
+    {
+      "case_id": "mw-adv-003",
+      "faithfulness": 0.9
+    },
+    {
+      "case_id": "mw-adv-004",
+      "faithfulness": 0.6818
+    },
+    {
+      "case_id": "la-blog-001",
+      "faithfulness": 0.9556
+    },
+    {
+      "case_id": "la-blog-002",
+      "faithfulness": 0.8387
+    },
+    {
+      "case_id": "la-prog-001",
+      "faithfulness": 0.92
+    },
+    {
+      "case_id": "la-prog-002",
+      "faithfulness": 0.8421
+    },
+    {
+      "case_id": "la-news-001",
+      "faithfulness": 0.88
+    },
+    {
+      "case_id": "la-social-001",
+      "faithfulness": 0.75
+    },
+    {
+      "case_id": "la-social-002",
+      "faithfulness": 0.8125
+    },
+    {
+      "case_id": "la-blog-003",
+      "faithfulness": 1.0
+    },
+    {
+      "case_id": "la-blog-004",
+      "faithfulness": 0.9615
+    },
+    {
+      "case_id": "la-social-003",
+      "faithfulness": 0.6923
+    },
+    {
+      "case_id": "la-news-002",
+      "faithfulness": 0.2692
+    },
+    {
+      "case_id": "la-blog-005",
+      "faithfulness": 0.8475
+    },
+    {
+      "case_id": "la-adv-001",
+      "faithfulness": 0.8462
+    },
+    {
+      "case_id": "la-adv-002",
+      "faithfulness": 0.8026
+    },
+    {
+      "case_id": "la-adv-003",
+      "faithfulness": 0.6111
+    },
+    {
+      "case_id": "la-adv-004",
+      "faithfulness": 0.96
+    }
+  ]
+}

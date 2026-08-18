@@ -1,0 +1,6 @@
+# Pinned known-good set for the optional ragas faithfulness cross-check
+# (evals/ragas_check.py). Kept out of requirements.txt because ragas pulls a
+# heavy, version-sensitive dependency tree; install only when running the cross-check.
+ragas==0.2.10
+langchain-community>=0.3,<0.4
+langchain-openai
