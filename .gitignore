@@ -36,3 +36,7 @@ Thumbs.db
 .vscode/settings.json
 .idea/
 outputs/
+
+# local handoff scratch
+apply_*.sh
+step2*.patch
