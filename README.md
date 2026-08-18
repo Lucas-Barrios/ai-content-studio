@@ -1,328 +1,110 @@
 # AI Content Studio
 
-A production-oriented AI marketing content workspace for generating brand-conditioned content across channels. The system combines a Next.js frontend, a FastAPI backend, OpenAI generation, optional Supabase persistence, RAG ingestion, brand profiles, campaign generation, content repurposing, feedback capture, and a feature-flagged TypeScript prompt framework.
+**Governed, multi-tenant AI content generation with brand-safe guardrails, RAG grounding, and reproducible evaluation.**
 
-## Start Here
+Most AI content generators are a prompt and a hope. In regulated industries that hope is a liability. A wealth manager cannot promise "guaranteed returns," an aesthetics clinic cannot promise "permanent, 100% safe results," and a generic model will write both without hesitation. This project is a reference implementation of a governed content pipeline (brand voice, banned-claim enforcement, and RAG grounding, served per client with tenant isolation) together with the evaluation harness that measures whether the governance actually holds.
 
-- **Project scope:** [`docs/project_scope_delivery_plan.md`](docs/project_scope_delivery_plan.md)
-- **Supabase setup:** [`docs/supabase_setup.md`](docs/supabase_setup.md)
+The evaluation is the point. Shipping AI features without evals is a fast way to lose trust, and a system that claims to be brand-safe but cannot prove it is worth little. So the headline of this repository is not the application. It is the scorecard.
+
+## Headline result
+
+A reproducible evaluation over 32 cases across two regulated demo brands (16 each, including 8 adversarial cases engineered to elicit a compliance violation), comparing a naive baseline (generic prompt, no brand, no retrieval) against the system (brand profile, RAG grounding, and a compliance-aware template). Generation runs on `gpt-4o-mini`; judging runs on `gpt-4o`, a stronger and different model chosen to reduce self-preference bias; groundedness is independently cross-checked with ragas.
+
+| Metric | baseline | system | notes |
+|---|---|---|---|
+| True violation rate (judge, context-aware) | 0.28 | 0.00 | asserted prohibited claims |
+| Adversarial safe-reframing (judge) | 0.00 | 1.00 | 8 of 8 traps refused |
+| Groundedness (LLM judge) | n/a | 0.95 | ragas faithfulness: 0.78 |
+| Brand-voice adherence (judge) | 0.37 | 0.80 | |
+| Disclosure coverage | 0.27 | 0.59 | genuine gap, see below |
+| Banned-term rate (raw, context-blind) | 0.44 | 0.22 | mostly negations, see below |
+| Generic-opener rate | 0.03 | 0.00 | anti-slop check |
+| Cost per run (USD) | 0.012 | 0.018 | 32 generations |
+
+Reproduce it:
+
+```bash
+python -m evals.run                 # generate and score, both arms
+python -m evals.ragas_check         # independent faithfulness cross-check
+python -m pytest evals/tests/ -q    # 27 tests; the evaluator is itself tested
+```
+
+### What the numbers say, including where the system is weak
+
+Two figures in that table are deliberately unflattering, and they are what make it credible.
+
+Disclosure coverage is only 0.59. The system is excellent at not asserting prohibited claims (0.00 true violations) but merely good at reliably including required disclosures such as "past performance is not a reliable indicator" or "results vary." That is a measured weakness and the next improvement target, not something averaged away.
+
+The raw banned-term rate (0.22) sits above the judge-confirmed rate (0.00). That gap is not a violation. It is context-blindness: a substring checker flags "results are not permanent" as a "permanent" violation. The purpose of the LLM-judge layer is to distinguish asserting a claim from refusing one, and the scorecard reports both numbers so the difference is visible rather than laundered.
+
+Groundedness reads 0.95 by the LLM judge and 0.78 by ragas. Both indicate strong grounding. The difference reflects the stricter atomic-claim decomposition ragas performs. Both are reported rather than the more flattering single number.
+
+The design principle throughout: report the dual numbers, disclose the gaps, and cross-check your own metrics against your own interest.
+
+## How the evaluation works
+
+Three layers, from most objective to least.
+
+Deterministic checkers (`evals/checkers.py`) handle banned-term matching with true word boundaries, so "cure" does not match "manicure" or "procedure," plus curly-quote normalization, required-disclosure coverage, and a generic-opener check for anti-slop. This layer is fully offline, needs no API, and is unit-tested.
+
+LLM-as-judge (`evals/judges.py`, temperature 0) provides a context-aware claim check (assert versus negate), groundedness against retrieved context, and brand-voice adherence. The judge runs on a stronger and different model than the generator.
+
+An independent cross-check (`evals/ragas_check.py`) runs ragas Faithfulness on the system arm, isolated in its own pinned dependency set so it can never break the core harness.
+
+The golden dataset (`evals/datasets/*.jsonl`) holds 32 version-controlled cases across the two tenants, each declaring the disclosures it requires and spanning standard, hard, and adversarial difficulty. Silent degradation is guarded: if the system arm loses its brand block or retrieves zero chunks, the run flags it loudly rather than quietly scoring a broken pipeline as a valid result.
+
+## The two demo tenants
+
+Both are fictional, chosen because generic model output is a genuine compliance liability in each, which is what makes the governance delta large and legible.
+
+Meridian Wealth is a DACH wealth advisory operating under financial-promotion rules: no "guaranteed," "risk-free," or "beat the market," and mandatory risk disclosures. Lumen Aesthetics is a Berlin aesthetics clinic operating under medical-advertising rules: no "permanent," "100% safe," or "cure," consent-first calls to action, and outcomes stated as temporary and variable.
+
+They sit under one demo agency organization, Northlight Studio, with per-client isolation enforced by Postgres row-level security. The same platform serves opposite regulatory regimes, which is the multi-tenant story an agency or consultancy actually cares about.
 
 ## Architecture
 
-```txt
-Next.js frontend
+```
+Next.js frontend (TypeScript prompt framework, shadcn)
   -> Next.js API routes
-  -> FastAPI Python backend
-  -> generation, RAG, campaign, repurpose, brand, feedback services
-  -> OpenAI + Supabase Postgres/pgvector
+  -> FastAPI backend
+       -> brand profiles and banned-term governance
+       -> RAG ingestion and retrieval (OpenAI embeddings, pgvector)
+       -> generation (OpenAI)
+  -> Supabase Postgres and pgvector (multi-tenant, row-level security on every table)
 ```
 
-| Area | Key Files |
+| Area | Key files |
 |---|---|
-| Frontend app | `frontend/app/*`, `frontend/components/*` |
-| Frontend API proxy | `frontend/app/api/*` |
-| TS prompt framework | `frontend/lib/ai/*`, `frontend/lib/generation/*` |
+| Evaluation harness | `evals/` |
+| RAG ingestion and retrieval | `src/rag_ingestion.py` |
+| Brand governance | `src/brand_intelligence.py` |
+| Brand-neutral prompt templates | `src/prompt_templates.py` |
 | Python API | `api_server.py` |
-| Core generation | `src/generation_service.py`, `src/content_pipeline.py`, `src/prompt_templates.py` |
-| OpenAI wrapper | `src/llm_integration.py` |
-| RAG ingestion | `src/rag_ingestion.py` |
-| Campaigns | `src/campaign_service.py`, `src/campaign_prompt_templates.py` |
-| Repurposing | `src/repurpose_service.py`, `src/repurpose_prompt_templates.py` |
-| Supabase schema | `supabase/migrations/*` |
+| Supabase schema and migrations | `supabase/migrations/` |
+| Frontend | `frontend/app/`, `frontend/components/` |
 
-## Prerequisites
+## What is real, and what is roadmap
 
-- Python 3.10+
-- Node.js 20+
-- npm
-- OpenAI API key
-- Optional: Supabase project with the migrations in `supabase/migrations/`
+Honesty about maturity is part of the point.
 
-## 1. Backend Setup
+Real and reproducible today: the full evaluation harness and every number above; a multi-tenant schema with row-level security, two seeded regulated tenants, and RAG ingestion with content-hash dedup; brand-profile governance (voice, approved and banned terms, compliance notes) injected at generation time; and vector retrieval (pgvector, HNSW cosine) over per-tenant knowledge bases.
 
-From the project root:
+On the roadmap, in order. Production RAG comes first: hybrid retrieval (BM25 with vector) and reranking, with the harness measuring whether it lifts groundedness above the current 0.95 judge and 0.78 ragas. Guardrails follow: prompt-injection defense, PII checks, and explicit OWASP-LLM and EU AI Act mapping, with disclosure coverage (0.59) as a named target. Then cost and observability: per-generation tracing and model routing. Finally, wiring vector retrieval into the primary generation endpoint, which currently grounds through a file-based path while the evaluation exercises the intended RAG pipeline directly, and consolidating the two generation paths.
+
+## Run it
+
+Full setup for backend, frontend, Supabase, and environment lives in [`docs/SETUP.md`](docs/SETUP.md). The short version:
 
 ```bash
-cd /Users/lucas/Desktop/Ironhack_labs/AI_content_creator_system/ai-content-creator
-python3 -m venv venv
-source venv/bin/activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
+# set OPENAI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY in .env
+python -m evals.ingest_kb        # embed the two tenants' knowledge bases
+python -m evals.run              # run the evaluation
 ```
 
-Edit `.env`:
+## Notes on method
 
-```env
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4o-mini
+Same-provider generate-and-judge (`gpt-4o` judging `gpt-4o-mini`) reduces but does not eliminate self-preference bias. A cross-provider judge is a supported configuration through `JUDGE_MODEL` and a natural next step.
 
-# Optional but needed for Supabase-backed RAG, campaigns, assets, and saved outputs
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
-
-# Optional local API protection. If set, frontend PYTHON_API_KEY must match.
-BACKEND_API_KEY=
-ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-```
-
-For local development, you may leave `BACKEND_API_KEY` empty. For production, set a long random value.
-
-Start the backend:
-
-```bash
-uvicorn api_server:app --reload --host 127.0.0.1 --port 8000
-```
-
-Backend health check:
-
-```bash
-curl http://127.0.0.1:8000/health
-```
-
-## 2. Frontend Setup
-
-Open a second terminal:
-
-```bash
-cd /Users/lucas/Desktop/Ironhack_labs/AI_content_creator_system/ai-content-creator/frontend
-npm install
-cp .env.example .env.local
-```
-
-Edit `frontend/.env.local`:
-
-```env
-PYTHON_API_BASE_URL=http://localhost:8000
-
-# Only set this if BACKEND_API_KEY is set in backend .env
-PYTHON_API_KEY=
-
-ENABLE_TS_PROMPT_FRAMEWORK=false
-TS_PROMPT_FRAMEWORK_MODE=social_only
-TS_PROMPT_AB_TEST=false
-
-# Optional browser-safe Supabase values
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_or_anon_key_here
-```
-
-Start the frontend:
-
-```bash
-npm run dev
-```
-
-Open:
-
-```txt
-http://localhost:3000
-```
-
-Useful pages:
-
-```txt
-http://localhost:3000/generator
-http://localhost:3000/dashboard
-http://localhost:3000/campaigns
-http://localhost:3000/knowledge-base
-http://localhost:3000/repurpose
-http://localhost:3000/assets
-http://localhost:3000/settings
-```
-
-## TypeScript Prompt Framework
-
-The new prompt framework is wired into real generation behind feature flags. It is rollback-safe and falls back to the Python backend if unsupported or if the framework fails.
-
-Enable it in `frontend/.env.local`:
-
-```env
-ENABLE_TS_PROMPT_FRAMEWORK=true
-TS_PROMPT_FRAMEWORK_MODE=social_only
-TS_PROMPT_AB_TEST=false
-```
-
-Modes:
-
-- `social_only`: routes `social` / `social_post` through the TS prompt framework.
-- `supported`: routes social, email/newsletter, and ad/ad_copy.
-- `all`: reserved for future expansion.
-
-See:
-
-- `docs/prompt_engineering_framework.md`
-- `docs/ts_prompt_framework_migration.md`
-- `docs/uniqueness_evidence_demo.md`
-
-## Supabase Setup
-
-The database schema is in:
-
-```txt
-supabase/migrations/
-```
-
-Core capabilities covered by the schema:
-
-- organizations, clients, projects
-- brand profiles
-- uploaded documents and chunks
-- pgvector embeddings
-- content briefs
-- generated outputs
-- campaigns and calendar items
-- feedback and output versions
-
-Setup notes:
-
-- Apply migrations in timestamp order.
-- Use the service role key only in backend `.env`.
-- Use only publishable/browser-safe keys in `frontend/.env.local`.
-- Never commit real `.env` files.
-
-More detail:
-
-- `docs/project_scope_delivery_plan.md`
-- `docs/supabase_setup.md`
-- `docs/database_schema.md`
-- `docs/rag_ingestion.md`
-
-## Common Commands
-
-Backend checks:
-
-```bash
-PYTHONPYCACHEPREFIX=/private/tmp python3 -m py_compile api_server.py src/*.py
-python3 test_security.py
-python3 test_openai_wrapper.py
-python3 test_rag_ingestion.py
-```
-
-Frontend checks:
-
-```bash
-cd frontend
-npm run typecheck
-npm run lint
-npm run build
-```
-
-CLI generation:
-
-```bash
-python main.py --type blog --topic "Evidence-based investing"
-python main.py --type social --topic "Open Day June 2026" --extra "Join us 14 June in Berlin"
-python main.py --type program --topic "MSc Applied Data Science and AI"
-python main.py --type newsletter --topic "April Campus Updates"
-```
-
-## API Overview
-
-Backend endpoints include:
-
-- `GET /health`
-- `POST /generate`
-- `POST /llm/generate`
-- `POST /upload`
-- `POST /knowledge/ingest-text`
-- `POST /knowledge/ingest-file`
-- `POST /knowledge/search`
-- `GET /brand-profile`
-- `POST /brand-profile`
-- `POST /campaigns/generate`
-- `POST /repurpose`
-- `GET /generated-outputs`
-- `POST /generated-outputs`
-- `POST /feedback`
-- `POST /chat`
-- `POST /chat/stream`
-- `POST /compare`
-- `POST /export/docx`
-
-Frontend API routes proxy to the backend through `PYTHON_API_BASE_URL`.
-
-## Troubleshooting
-
-### Port 8000 is already in use
-
-```bash
-lsof -ti tcp:8000
-kill <PID>
-```
-
-Then restart:
-
-```bash
-uvicorn api_server:app --reload --host 127.0.0.1 --port 8000
-```
-
-### Port 3000 is already in use
-
-```bash
-lsof -ti tcp:3000
-kill <PID>
-```
-
-Then restart:
-
-```bash
-cd frontend
-npm run dev
-```
-
-### Frontend cannot reach backend
-
-Check `frontend/.env.local`:
-
-```env
-PYTHON_API_BASE_URL=http://localhost:8000
-```
-
-Restart the frontend after changing env vars.
-
-### API key errors
-
-If `BACKEND_API_KEY` is set in `.env`, then `PYTHON_API_KEY` in `frontend/.env.local` must match it.
-
-### Supabase errors
-
-Confirm backend `.env` has:
-
-```env
-SUPABASE_URL=...
-SUPABASE_SERVICE_ROLE_KEY=...
-```
-
-Confirm frontend `.env.local` has only browser-safe values:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
-```
-
-## Project Structure
-
-```txt
-ai-content-creator/
-├── README.md
-├── api_server.py
-├── frontend/
-│   ├── app/
-│   ├── components/
-│   └── lib/
-│       ├── ai/
-│       ├── generation/
-│       └── api-client.ts
-├── src/
-├── docs/
-├── knowledge_base/
-│   ├── primary/
-│   └── secondary/
-├── supabase/
-│   └── migrations/
-├── examples/
-├── requirements.txt
-└── .env.example
-```
-
-This structure keeps the repository entry points at the root, product/technical documentation in `docs/`, frontend code in `frontend/`, backend code in `src/` plus `api_server.py`, and database migrations in `supabase/migrations/`.
+No fabricated metrics, clients, or history. Every figure here is produced by a committed report in `evals/reports/` and is reproducible from the commands above.
